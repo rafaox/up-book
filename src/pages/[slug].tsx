@@ -1,17 +1,17 @@
+import { useEffect, useState } from 'react';
+
+import { useRouter } from 'next/router';
 import NextLink from 'next/link';
 import { Box, Button, Flex, Icon, Text } from '@chakra-ui/react';
 import { IoArrowBack } from 'react-icons/io5';
 
 import { Header } from '../components/Header';
+import { api } from '../services/api';
 
 type Book = {
   title: string;
   description: string;
   publishedDate: Date;
-  imageLinks: {
-    smallThumbnail: string;
-    thumbnail: string;
-  }
 }
 
 type ResponseItem = {
@@ -24,6 +24,32 @@ interface BookProps {
 }
 
 export default function Book({ item }: BookProps) {
+  
+  const [book, setBook ] = useState<ResponseItem>();
+
+  const router = useRouter();
+  const { slug } = router.query;
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await api.get(`books/v1/volumes/${router.query.slug}`);
+      const data = await response.data;
+
+      const item: ResponseItem = {
+        id: data.id,
+        volumeInfo: {
+          title: data.volumeInfo.title,
+          description: data.volumeInfo.description,
+          publishedDate: data.volumeInfo.publishedDate
+        }
+      };
+      setBook(item);
+    }
+    
+    if (slug)
+      fetchData();
+  }, [slug]);
+
   return (
     <Flex
       direction='column'
@@ -47,32 +73,41 @@ export default function Book({ item }: BookProps) {
               right='4'
               bg='teal.400'
             >
-              Voltar
               <Icon
                 as={IoArrowBack}
                 fontSize="20"
               />
+              Voltar
             </Button>
           </NextLink>
 
           <Text
             as='h2'
+            color='teal.400'
+            fontWeight='bold'
+            fontSize='lg'
+            pt='4'
+            pb='2'
+            letterSpacing={1}
           >
-            { item?.volumeInfo.title }
+            { book?.volumeInfo?.title }
           </Text>
 
           <Text
             as='h4'
+            letterSpacing={1}
           >
-            { item?.volumeInfo.publishedDate }
+            Publicado em { book?.volumeInfo?.publishedDate }
           </Text>
 
           <Text
             as='p'
+            fontSize='sm'
+            letterSpacing={1}
+            pt='4'
           >
-            { item?.volumeInfo.publishedDate }
+            { book?.volumeInfo?.description }
           </Text>
-          
         </Box>
       </Flex>
     </Flex>

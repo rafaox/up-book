@@ -27,17 +27,16 @@ interface GetBooksResponse {
 
 export async function getBooks(page: number, search: string): Promise<GetBooksResponse> {
 
-  // if (!search) {
-  //   return {
-  //     totalItems: 0,
-  //     books: []
-  //   };
-  // }
+  if (!search) {
+    return {
+      totalItems: 0,
+      books: []
+    };
+  }
 
   const { data } = await api.get('books/v1/volumes', {
     params: {
-      // q: search,
-      q: 'javascript',
+      q: search,
       startIndex: page - 1
     }
   });
