@@ -1,17 +1,15 @@
 import { ChakraProvider } from '@chakra-ui/react';
-import { QueryClientProvider } from 'react-query';
 
-import { queryClient } from '../services/queryClient';
-
+import { SearchProvider } from '../services/hooks/useSearch';
 import { theme } from '../styles/theme';
 
 function MyApp({ Component, pageProps }) {
   return (
-    <QueryClientProvider client={queryClient}>
+    <SearchProvider>
       <ChakraProvider theme={theme}>
         <Component {...pageProps} />
       </ChakraProvider>
-    </QueryClientProvider>
+    </SearchProvider>
   );
 }
 

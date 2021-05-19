@@ -3,10 +3,18 @@ import { useRef, useState } from "react";
 import { Flex, Icon, Input } from "@chakra-ui/react";
 import { RiSearchLine } from 'react-icons/ri';
 
+import { useSearch } from "../../services/hooks/useSearch";
+
 export function SearchBox() {
   const [searchValue, setSearchValue] = useState('');
+  const { searchBooks } = useSearch();
 
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  function handleSearch(e) {
+    e.preventDefault();
+    if (e.key === 'Enter') searchBooks(1, searchValue);
+  }
 
   return (
     <Flex
@@ -30,13 +38,14 @@ export function SearchBox() {
         placeholder='Buscar livro'
         _placeholder={{ color: 'grya.400' }}
         ref={searchInputRef}
+        onKeyUp={(e) => handleSearch(e)}
         onChange={(e) => setSearchValue(e.target.value)}
       />
       <Icon
         as={RiSearchLine}
         fontSize="20"
         cursor='pointer'
-        // onClick={() => getBooks(1, searchValue)}
+        onClick={() => searchBooks(1, searchValue)}
       />
     </Flex>
   );

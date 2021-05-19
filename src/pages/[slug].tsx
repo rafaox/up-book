@@ -19,11 +19,7 @@ type ResponseItem = {
   volumeInfo: Book;
 }
 
-interface BookProps {
-  item: ResponseItem;
-}
-
-export default function Book({ item }: BookProps) {
+export default function Book() {
   
   const [book, setBook ] = useState<ResponseItem>();
 

@@ -3,23 +3,24 @@ import { useState } from 'react';
 import {
   Box,
   Flex,
-  Heading,
   HStack,
+  Icon,
+  IconButton,
   Image,
   Link,
-  Spinner,
   Text
 } from '@chakra-ui/react';
+import { AiFillStar, AiOutlineStar } from 'react-icons/ai';
 
 import { Header } from '../components/Header';
-import { useBooks } from '../services/hooks/useBooks';
 import { Pagination } from '../components/Pagination';
 import { queryClient } from '../services/queryClient';
 import { api } from '../services/api';
+import { useSearch } from '../services/hooks/useSearch';
 
 export default function Home() {
   const [ page, setPage ] = useState(1);
-  const { data, isLoading, isFetching, error } = useBooks(page, '');
+  const { items, totalItems, changePage, setFavorite } = useSearch();
 
   async function handlePrefetchUser(bookId: string) {
     await queryClient.prefetchQuery(['books/v1/volumes', bookId], async () => {
@@ -41,24 +42,7 @@ export default function Home() {
           borderRadius={8}
           p='8'
         >
-          <Flex mb='8' justify='space-between' align='center'>
-            <Heading
-              size='lg'
-              fontWeight='normal'
-            >
-              { !isLoading && isFetching && <Spinner size='sm' color='gray.500' ml='4' />}
-            </Heading>
-          </Flex>
-
-          { isLoading ? (
-            <Flex justify='center'>
-              <Spinner />
-            </Flex>
-          ) : error ? (
-            <Flex justify='center'>
-              <Text>Falha ao obter dados dos usuários</Text>
-            </Flex>
-          ) : data.totalItems === 0 || data.books.length <= 0 ? (
+          { totalItems === 0 || items.length <= 0 ? (
             <Flex justify='center'>
               <Image
                 src='/ufo-no-results-found.png'
@@ -70,15 +54,10 @@ export default function Home() {
             </Flex>
           ) : (
             <>
-              {data.books.map(book => (
-                <Link
-                  as='a'
-                  key={book.id}
-                  href={book.id}
-                  textDecoration='none'
-                  onMouseEnter={() => handlePrefetchUser(book.id)}
-                >
+              {items.map(book => (
+                
                   <HStack
+                    key={book.id}
                     spacing='24px'
                     p={5}
                     bg='gray.800'
@@ -95,12 +74,47 @@ export default function Home() {
                     />
 
                     <Box>
-                      <Text
-                        color='teal.400'
-                        fontWeight='bold'
+                      <Link
+                        as='a'
+                        href={book.id}
+                        textDecoration='none'
+                        onMouseEnter={() => handlePrefetchUser(book.id)}
                       >
-                        {book.volumeInfo.title}
-                      </Text>
+                        <Text
+                          color='teal.400'
+                          fontWeight='bold'
+                        >
+                          {book.volumeInfo.title}
+                        </Text>
+                      </Link>
+
+                      {book.favorite ? (
+                        <IconButton
+                          aria-label='up star'
+                          bg='gray.800'
+                          py='2'
+                          px='0'
+                          _hover={{
+                            bg: 'gray.800',
+                            color: 'teal.800'
+                          }}
+                          icon={<Icon as={AiFillStar} />}
+                          onClick={() => setFavorite(book)}
+                        />
+                      ) : (
+                        <IconButton
+                          aria-label='down star'
+                          bg='gray.800'
+                          py='2'
+                          px='0'
+                          _hover={{
+                            bg: 'gray.800',
+                            color: 'teal.800'
+                          }}
+                          icon={<Icon as={AiOutlineStar} />}
+                          onClick={() => setFavorite(book)}
+                        />
+                      )}
 
                       <Text py='2'>
                         {book.volumeInfo.publishedDate}
@@ -114,12 +128,13 @@ export default function Home() {
                       </Text>
                     </Box>
                   </HStack>
-                </Link>
+                
               ))}
               <Pagination
-                totalCountOfRegisters={data.totalItems + 1}
+                totalCountOfRegisters={totalItems + 1}
                 currentPage={page}
                 onPageChange={setPage}
+                changePage={changePage}
               />
             </>
           )}
